@@ -6,6 +6,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.FieldNameValidator;
@@ -30,6 +31,8 @@ public class Store {
         MongoDatabase database = mongoClient.getDatabase("local");
         MongoCollection<Document> shops = database.getCollection("Store");
         MongoCollection<Document> goods = database.getCollection("Goods");
+        shops.drop();
+        goods.drop();
 
         sc = new Scanner(System.in);
 
@@ -57,10 +60,9 @@ public class Store {
                         break;
                     case "ВЫСТАВИТЬ_ТОВАР":
 
-                        shops.aggregate(Arrays.asList(
-                                Aggregates.match(Filters.eq("name",array[2])),
-                                Aggregates.addFields(new Field<>("goods", array[1]))
-                        ));
+                        BsonDocument bsonDocument = new BsonDocument();
+
+                        shops.updateOne(Filters.eq("name", array[2]), Updates.push("goods", array[1]));
                         break;
                     case "СТАТИСТИКА_ТОВАРА":
 
