@@ -1,12 +1,19 @@
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Field;
+import com.mongodb.client.model.Filters;
 import org.bson.BsonDocument;
 import org.bson.Document;
+import org.bson.FieldNameValidator;
 import org.bson.conversions.Bson;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -38,7 +45,7 @@ public class Store {
                     case "ДОБАВИТЬ_МАГАЗИН":
                         ArrayList<String> goodsList = new ArrayList<>();
                         shops.insertOne(new Document()
-                                .append("name", array[1]).append("goods", goodsList));
+                                .append("name", array[1]));
                         break;
                     case "ДОБАВИТЬ_ТОВАР":
                         goods.insertOne(new Document()
@@ -49,26 +56,19 @@ public class Store {
                         isTrue = false;
                         break;
                     case "ВЫСТАВИТЬ_ТОВАР":
-                        Bson query = BsonDocument.parse("{$match: {name: " + array[2] + "}}");
-                        Bson query1 = BsonDocument.parse("{ $addFields: { goods: { $concatArrays: [ \"$goods\", [ " + array[1] + " ] ] } } }");
-                        List<Bson> queries = new ArrayList<>();
-                        queries.add(query);
-                        queries.add(query1);
-                        shops.aggregate(queries);
+
+                        shops.aggregate(Arrays.asList(
+                                Aggregates.match(Filters.eq("name",array[2])),
+                                Aggregates.addFields(new Field<>("goods", array[1]))
+                        ));
                         break;
                     case "СТАТИСТИКА_ТОВАРА":
-                        Bson query2 = BsonDocument.parse("${\n" +
-                                "     $lookup:\n" +
-                                "       {\n" +
-                                "         from: \"Goods\",\n" +
-                                "         localField: \"goods\",\n" +
-                                "         foreignField: \"name\",\n" +
-                                "         as: \"goods_in_shop\"\n" +
-                                "       }\n" +
-                                "  }");
-                        List<Bson> queries1 = new ArrayList<>();
-                        queries1.add(query2);
-                        shops.aggregate(queries1);
+
+                        Block<Document> printBlock = document -> System.out.println(document.toJson());
+                        shops.aggregate(
+                                Arrays.asList(Aggregates.lookup("Goods", "goods", "name", "goodsList")))
+                                .forEach(printBlock);
+
                 }
             }catch(ArrayIndexOutOfBoundsException ex){
                     ex.getMessage();
