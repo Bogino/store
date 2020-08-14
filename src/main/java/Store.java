@@ -50,7 +50,7 @@ public class Store {
                     case "ДОБАВИТЬ_ТОВАР":
                         goods.insertOne(new Document()
                                 .append("name", array[1])
-                                .append("price", array[2]));
+                                .append("price", Integer.parseInt(array[2])));
                         break;
                     case "СТОП":
                         isTrue = false;
@@ -67,9 +67,11 @@ public class Store {
                         shops.aggregate(
                                 Arrays.asList(Aggregates.lookup("Goods", "goods", "name", "goodsList"),
                                         Aggregates.unwind("$goodsList"),
-                                        Aggregates.group(null, Accumulators.min("minPrice","$goodsList.price"),
+                                        Aggregates.group("$name",
+                                                Accumulators.min("minPrice","$goodsList.price"),
                                                 Accumulators.avg("avgPrice", "$goodsList.price"),
-                                                Accumulators.max("maxPrice","$goodsList.price"))))
+                                                Accumulators.max("maxPrice","$goodsList.price"),
+                                                Accumulators.sum("countItems",1))))
                                 .forEach(printBlock);
 
                 }
