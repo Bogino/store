@@ -68,7 +68,8 @@ public class Store {
 
                         Block<Document> printBlock = document -> System.out.println(document.toJson());
                         shops.aggregate(
-                                Arrays.asList(Aggregates.lookup("Goods", "goods", "name", "goodsList")))
+                                Arrays.asList(Aggregates.lookup("Goods", "goods", "name", "goodsList"),
+                                        Aggregates.unwind("$goodsList")))
                                 .forEach(printBlock);
 
                 }
