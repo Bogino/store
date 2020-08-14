@@ -3,10 +3,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Field;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.*;
 import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.FieldNameValidator;
@@ -69,7 +66,10 @@ public class Store {
                         Block<Document> printBlock = document -> System.out.println(document.toJson());
                         shops.aggregate(
                                 Arrays.asList(Aggregates.lookup("Goods", "goods", "name", "goodsList"),
-                                        Aggregates.unwind("$goodsList")))
+                                        Aggregates.unwind("$goodsList"),
+                                        Aggregates.group(null, Accumulators.min("minPrice","$goodsList.price"),
+                                                Accumulators.avg("avgPrice", "$goodsList.price"),
+                                                Accumulators.max("maxPrice","$goodsList.price"))))
                                 .forEach(printBlock);
 
                 }
