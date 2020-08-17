@@ -1,25 +1,14 @@
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
-import org.bson.BsonDocument;
 import org.bson.Document;
-import org.bson.FieldNameValidator;
-import org.bson.conversions.Bson;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 
 public class Store {
-
-    private static Scanner sc;
-    private static boolean isTrue = true;
 
 
     public static void main(String[] args) {
@@ -31,7 +20,8 @@ public class Store {
         shops.drop();
         goods.drop();
 
-        sc = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
+        boolean isTrue = true;
 
         while (isTrue) {
 
@@ -43,7 +33,6 @@ public class Store {
             try {
                 switch (array[0]) {
                     case "ДОБАВИТЬ_МАГАЗИН":
-                        ArrayList<String> goodsList = new ArrayList<>();
                         shops.insertOne(new Document()
                                 .append("name", array[1]));
                         break;
@@ -56,8 +45,6 @@ public class Store {
                         isTrue = false;
                         break;
                     case "ВЫСТАВИТЬ_ТОВАР":
-
-                        BsonDocument bsonDocument = new BsonDocument();
 
                         shops.updateOne(Filters.eq("name", array[2]), Updates.push("goods", array[1]));
                         break;
