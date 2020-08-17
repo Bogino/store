@@ -6,6 +6,7 @@ import com.mongodb.client.model.*;
 import org.bson.Document;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 
 public class Store {
@@ -46,11 +47,27 @@ public class Store {
                         break;
                     case "ВЫСТАВИТЬ_ТОВАР":
 
-                        shops.updateOne(Filters.eq("name", array[2]), Updates.push("goods", array[1]));
+                        try {
+
+                            shops.find(Filters.eq("name", array[2])).first().equals(null);
+
+                        } catch (NullPointerException ex){
+                            System.out.println("Такого магазина нет(");
+                        }
+
+                        try {
+
+                            goods.find(Filters.eq("name", array[1])).first().equals(null);
+
+                        } catch (NullPointerException ex){
+                            System.out.println("Нет такого товара");
+                        }
+                         shops.updateOne(Filters.eq("name", array[2]), Updates.push("goods", array[1]));
+
                         break;
                     case "СТАТИСТИКА_ТОВАРА":
 
-                        Block<Document> printBlock = document -> System.out.println(document.toJson());
+                        //Block<Document> printBlock = document -> System.out.println(document.toJson());
                         shops.aggregate(
                                 Arrays.asList(Aggregates.lookup("Goods", "goods", "name", "goodsList"),
                                         Aggregates.unwind("$goodsList"),
@@ -59,7 +76,7 @@ public class Store {
                                                 Accumulators.avg("avgPrice", "$goodsList.price"),
                                                 Accumulators.max("maxPrice","$goodsList.price"),
                                                 Accumulators.sum("countItems",1))))
-                                .forEach(printBlock);
+                                .forEach((Consumer<? super Document>) System.out::println);
 
                 }
             }catch(ArrayIndexOutOfBoundsException ex){
