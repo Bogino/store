@@ -1,10 +1,8 @@
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.*;
 import org.bson.Document;
 
 import java.util.Arrays;
@@ -66,7 +64,9 @@ public class MongoMarket {
                                 Accumulators.min("minPrice","$goodsList.price"),
                                 Accumulators.avg("avgPrice", "$goodsList.price"),
                                 Accumulators.max("maxPrice","$goodsList.price"),
-                                Accumulators.sum("countItems",1))))
+                                Accumulators.sum("countItems",1),
+                                Accumulators.sum("sub100", new BasicDBObject("$cond", Arrays.asList(new BasicDBObject("$lt",
+                                        Arrays.asList("$goodsList.price",100)), 1, 0))))))
                 .forEach((Consumer<? super Document>) System.out::println);
     }
 
